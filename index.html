@@ -259,17 +259,21 @@
         </div>
         <div id="quest-badge" class="mt-3 bg-white/90 backdrop-blur-md px-3.5 py-1.5 rounded-2xl border-2 border-amber-300 shadow-lg text-amber-950 text-xs sm:text-sm font-bold flex items-center gap-1.5 max-w-[230px]">
             <span class="text-base">🧚‍♀️</span>
-            <span id="quest-text" class="truncate">跟随小精灵的光迹前往山村</span>
+            <span id="quest-text">跟随发光轨迹前往山村</span>
         </div>
     </div>
 
-    <!-- 右上角：古风BGM开关与操作提示按钮 -->
+    <!-- 右上角：古风BGM开关、暂停与操作提示按钮 -->
     <div id="top-right-controls" class="fixed top-4 right-4 z-20 flex items-center gap-2">
-        <button id="help-btn" class="game-action-btn bg-white/90 hover:bg-amber-50 text-amber-900 font-bold text-xs sm:text-sm px-3 py-2 rounded-full border-2 border-amber-300 shadow-md flex items-center gap-1">
+        <button id="pause-btn" class="game-action-btn bg-white/90 hover:bg-amber-50 text-amber-900 font-bold text-xs sm:text-sm px-3 py-2 rounded-full border-2 border-amber-300 shadow-md flex items-center gap-1 cursor-pointer" title="暂停游戏 (Esc)">
+            <span>⏸️</span>
+            <span class="hidden sm:inline">暂停</span>
+        </button>
+        <button id="help-btn" class="game-action-btn bg-white/90 hover:bg-amber-50 text-amber-900 font-bold text-xs sm:text-sm px-3 py-2 rounded-full border-2 border-amber-300 shadow-md flex items-center gap-1 cursor-pointer">
             <span>🎮</span>
             <span class="hidden sm:inline">操作指南</span>
         </button>
-        <button id="audio-btn" class="game-action-btn bg-white/90 hover:bg-amber-50 text-amber-900 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-full border-2 border-amber-300 shadow-md flex items-center gap-1.5">
+        <button id="audio-btn" class="game-action-btn bg-white/90 hover:bg-amber-50 text-amber-900 font-bold text-xs sm:text-sm px-3.5 py-2 rounded-full border-2 border-amber-300 shadow-md flex items-center gap-1.5 cursor-pointer">
             <span id="audio-icon">🔊</span>
             <span id="audio-label" class="hidden sm:inline">古风配乐</span>
         </button>
@@ -308,7 +312,7 @@
         <span class="opacity-40">|</span>
         <span>互动: <b class="text-amber-300">F</b></span>
         <span class="opacity-40">|</span>
-        <span>视角: <b class="text-amber-300">移动鼠标自由环顾 (点画面锁定)</b></span>
+        <span>暂停/恢复鼠标: <b class="text-amber-300">Esc</b></span>
     </div>
 
     <!-- 屏幕最右边（闪黑后移至正中央）直列四句古诗 -->
@@ -396,6 +400,7 @@
                         <li>• <b>Space (空格)</b>：跳跃</li>
                         <li>• <b>Control (Ctrl)</b>：蹲下</li>
                         <li>• <b>F 键</b>：开门 / 查看凉亭与红花</li>
+                        <li>• <b>Esc 键</b>：暂停游戏并恢复系统鼠标</li>
                     </ul>
                 </div>
                 <div class="bg-sky-100/70 p-3.5 rounded-2xl border border-sky-300">
@@ -406,6 +411,7 @@
                         <li>• <b>左下角轮盘</b>：操纵前后左右行走</li>
                         <li>• <b>滑动屏幕</b>：自由转动看的方向</li>
                         <li>• <b>右下角按钮</b>：点击<b>跳跃</b>、<b>蹲下</b>与<b>互动(F)</b></li>
+                        <li>• <b>右上角暂停键</b>：随时暂停游戏动作与动画</li>
                     </ul>
                 </div>
             </div>
@@ -413,6 +419,27 @@
             <button id="start-game-btn" class="game-action-btn mt-6 w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white font-black text-lg sm:text-xl shadow-xl border-2 border-amber-200 cursor-pointer">
                 ✨ 出发寻找小精灵！
             </button>
+        </div>
+    </div>
+
+    <!-- 游戏暂停（停止）弹窗 -->
+    <div id="pause-modal" class="fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm hidden items-center justify-center p-4">
+        <div class="bg-gradient-to-b from-amber-50 to-white max-w-sm w-full rounded-[32px] border-4 border-amber-400 shadow-2xl p-6 sm:p-7 text-center">
+            <div class="w-16 h-16 mx-auto rounded-2xl bg-gradient-to-br from-amber-300 to-orange-400 flex items-center justify-center text-3xl shadow-md border-2 border-white mb-3">
+                ⏸️
+            </div>
+            <h2 class="text-2xl font-black text-amber-950">游戏已暂停</h2>
+            <p class="text-xs sm:text-sm font-bold text-amber-800 mt-2 leading-relaxed">
+                所有画面动画与角色动作已停止，系统鼠标指针已恢复，您可以自由切换网页或进行其他操作。
+            </p>
+            <div class="mt-6 flex flex-col gap-3">
+                <button id="resume-btn" class="game-action-btn w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 to-teal-600 text-white font-black text-base sm:text-lg shadow-lg border-2 border-white cursor-pointer">
+                    ▶️ 继续游戏
+                </button>
+                <button id="pause-restart-btn" class="game-action-btn w-full py-3 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-black text-sm border-2 border-amber-300 cursor-pointer">
+                    🔄 重新开始
+                </button>
+            </div>
         </div>
     </div>
 
@@ -631,6 +658,7 @@
          ********************************************************************/
         const gameState = {
             started: false,
+            paused: false,
             stage: 0,
             verseShown: [false, false, false, false],
             housesVisitedCount: 0,
@@ -643,18 +671,56 @@
 
         const storyTimers = [];
         function scheduleStoryTimeout(fn, delay) {
-            const id = setTimeout(() => {
-                const idx = storyTimers.indexOf(id);
+            const entry = {
+                id: null,
+                fn,
+                remaining: delay,
+                startTime: performance.now(),
+                paused: false
+            };
+            const trigger = () => {
+                const idx = storyTimers.indexOf(entry);
                 if (idx !== -1) storyTimers.splice(idx, 1);
                 fn();
-            }, delay);
-            storyTimers.push(id);
-            return id;
+            };
+            entry.id = setTimeout(trigger, delay);
+            storyTimers.push(entry);
+            return entry;
+        }
+
+        function pauseStoryTimers() {
+            const now = performance.now();
+            storyTimers.forEach(entry => {
+                if (!entry.paused && entry.id !== null) {
+                    clearTimeout(entry.id);
+                    entry.id = null;
+                    entry.remaining = Math.max(0, entry.remaining - (now - entry.startTime));
+                    entry.paused = true;
+                }
+            });
+        }
+
+        function resumeStoryTimers() {
+            storyTimers.forEach(entry => {
+                if (entry.paused) {
+                    entry.paused = false;
+                    entry.startTime = performance.now();
+                    const trigger = () => {
+                        const idx = storyTimers.indexOf(entry);
+                        if (idx !== -1) storyTimers.splice(idx, 1);
+                        entry.fn();
+                    };
+                    entry.id = setTimeout(trigger, entry.remaining);
+                }
+            });
         }
 
         function clearStoryTimers() {
             while (storyTimers.length > 0) {
-                clearTimeout(storyTimers.pop());
+                const entry = storyTimers.pop();
+                if (entry && entry.id !== null) {
+                    clearTimeout(entry.id);
+                }
             }
         }
 
@@ -1275,7 +1341,17 @@
         const wheelInput = { x: 0, y: 0 };
 
         window.addEventListener('keydown', (e) => {
-            if (!gameState.started || gameState.stage === 5) return;
+            if (e.code === 'Escape' || e.key === 'Escape') {
+                const welcomeHidden = document.getElementById('welcome-modal').classList.contains('hidden');
+                const completionHidden = document.getElementById('completion-modal').classList.contains('hidden');
+                if (gameState.started && gameState.stage < 5 && welcomeHidden && completionHidden) {
+                    e.preventDefault();
+                    togglePause();
+                }
+                return;
+            }
+
+            if (!gameState.started || gameState.paused || gameState.stage === 5) return;
             const code = e.code;
             if (code === 'KeyW' || code === 'ArrowUp') keys.w = true;
             if (code === 'KeyS' || code === 'ArrowDown') keys.s = true;
@@ -1313,7 +1389,7 @@
         });
 
         function triggerJump() {
-            if (!gameState.started || gameState.stage === 5) return;
+            if (!gameState.started || gameState.paused || gameState.stage === 5) return;
             if (player.isGrounded) {
                 player.vy = 9.2;
                 player.isGrounded = false;
@@ -1426,15 +1502,19 @@
         function updateCursorVisibility() {
             const welcomeHidden = document.getElementById('welcome-modal').classList.contains('hidden');
             const completionHidden = document.getElementById('completion-modal').classList.contains('hidden');
-            const inActiveGameplay = gameState.started && gameState.stage < 5 && welcomeHidden && completionHidden;
+            const inActiveGameplay = gameState.started && !gameState.paused && gameState.stage < 5 && welcomeHidden && completionHidden;
             document.body.classList.toggle('hide-cursor', inActiveGameplay);
+            const cursorEl = document.getElementById('custom-cursor');
+            if (cursorEl) {
+                cursorEl.style.opacity = inActiveGameplay ? '1' : '0';
+            }
         }
 
         function requestPointerLockIfNeeded() {
             updateCursorVisibility();
             const welcomeHidden = document.getElementById('welcome-modal').classList.contains('hidden');
             const completionHidden = document.getElementById('completion-modal').classList.contains('hidden');
-            if (gameState.started && gameState.stage < 5 && welcomeHidden && completionHidden) {
+            if (gameState.started && !gameState.paused && gameState.stage < 5 && welcomeHidden && completionHidden) {
                 try {
                     if (document.pointerLockElement !== canvas && canvas.requestPointerLock) {
                         const promise = canvas.requestPointerLock();
@@ -1446,6 +1526,51 @@
             }
         }
 
+        function pauseGame() {
+            if (!gameState.started || gameState.paused || gameState.stage === 5) return;
+            gameState.paused = true;
+            keys.w = keys.a = keys.s = keys.d = false;
+            resetWheel();
+            edgeTurnSpeed = 0;
+            isMouseDragging = false;
+            lastMouseX = null;
+            lastMouseY = null;
+            pauseStoryTimers();
+
+            const pauseModal = document.getElementById('pause-modal');
+            pauseModal.classList.remove('hidden');
+            pauseModal.classList.add('flex');
+
+            updateCursorVisibility();
+            if (document.pointerLockElement && document.exitPointerLock) {
+                document.exitPointerLock();
+            }
+        }
+
+        function resumeGame() {
+            if (!gameState.paused) return;
+            gameState.paused = false;
+            lastMouseX = null;
+            lastMouseY = null;
+            edgeTurnSpeed = 0;
+            clock.getDelta();
+            resumeStoryTimers();
+
+            const pauseModal = document.getElementById('pause-modal');
+            pauseModal.classList.add('hidden');
+            pauseModal.classList.remove('flex');
+
+            requestPointerLockIfNeeded();
+        }
+
+        function togglePause() {
+            if (gameState.paused) {
+                resumeGame();
+            } else {
+                pauseGame();
+            }
+        }
+
         document.addEventListener('pointerlockchange', () => {
             const locked = document.pointerLockElement === canvas;
             document.body.classList.toggle('pointer-locked', locked);
@@ -1453,15 +1578,24 @@
                 edgeTurnSpeed = 0;
                 lastMouseX = null;
                 lastMouseY = null;
+            } else if (gameState.started && !gameState.paused && gameState.stage < 5) {
+                const welcomeHidden = document.getElementById('welcome-modal').classList.contains('hidden');
+                const completionHidden = document.getElementById('completion-modal').classList.contains('hidden');
+                if (welcomeHidden && completionHidden) {
+                    pauseGame();
+                }
             }
         });
 
         // 在游戏画布监听点击事件，请求锁定指针
         canvas.addEventListener('click', () => {
-            requestPointerLockIfNeeded();
+            if (!gameState.paused) {
+                requestPointerLockIfNeeded();
+            }
         });
 
         canvas.addEventListener('mousedown', (e) => {
+            if (gameState.paused) return;
             if (e.button === 0) {
                 isMouseDragging = true;
                 lastMouseX = e.clientX;
@@ -1475,7 +1609,7 @@
 
         // 监听鼠标移动：同时支持 Pointer Lock 与预览沙盒下的直接移动转动视角
         window.addEventListener('mousemove', (e) => {
-            if (!gameState.started || gameState.stage === 5) return;
+            if (!gameState.started || gameState.paused || gameState.stage === 5) return;
             const welcomeHidden = document.getElementById('welcome-modal').classList.contains('hidden');
             const completionHidden = document.getElementById('completion-modal').classList.contains('hidden');
             if (!welcomeHidden || !completionHidden) return;
@@ -1532,7 +1666,7 @@
         let lastLookY = 0;
 
         canvas.addEventListener('touchstart', (e) => {
-            if (!gameState.started || gameState.stage === 5) return;
+            if (!gameState.started || gameState.paused || gameState.stage === 5) return;
             for (let i = 0; i < e.changedTouches.length; i++) {
                 const t = e.changedTouches[i];
                 if (lookTouchId === null) {
@@ -1544,7 +1678,7 @@
         }, { passive: true });
 
         canvas.addEventListener('touchmove', (e) => {
-            if (!gameState.started || gameState.stage === 5) return;
+            if (!gameState.started || gameState.paused || gameState.stage === 5) return;
             for (let i = 0; i < e.changedTouches.length; i++) {
                 const t = e.changedTouches[i];
                 if (t.identifier === lookTouchId) {
@@ -1635,7 +1769,7 @@
         }
 
         function triggerInteract() {
-            if (!gameState.started || !gameState.nearTarget) return;
+            if (!gameState.started || gameState.paused || !gameState.nearTarget) return;
             const { type, obj } = gameState.nearTarget;
 
             if (type === 'house') {
@@ -1941,6 +2075,7 @@
             }
 
             gameState.started = false;
+            gameState.paused = false;
             gameState.stage = 0;
             gameState.verseShown = [false, false, false, false];
             gameState.housesVisitedCount = 0;
@@ -2011,6 +2146,10 @@
             completionModal.classList.add('hidden');
             completionModal.classList.remove('flex');
 
+            const pauseModal = document.getElementById('pause-modal');
+            pauseModal.classList.add('hidden');
+            pauseModal.classList.remove('flex');
+
             document.getElementById('minimap-panel').style.opacity = '1';
             document.getElementById('wheel-container').style.opacity = '1';
             document.getElementById('action-buttons').style.opacity = '1';
@@ -2022,9 +2161,16 @@
         }
 
         document.getElementById('replay-btn').addEventListener('click', resetGame);
+        document.getElementById('pause-btn').addEventListener('click', togglePause);
+        document.getElementById('resume-btn').addEventListener('click', resumeGame);
+        document.getElementById('pause-restart-btn').addEventListener('click', resetGame);
 
         document.getElementById('start-game-btn').addEventListener('click', () => {
             document.getElementById('welcome-modal').classList.add('hidden');
+            if (gameState.paused) {
+                resumeGame();
+                return;
+            }
             updateCursorVisibility();
             if (!gameState.started) {
                 startGameIntro();
@@ -2034,6 +2180,13 @@
         });
 
         document.getElementById('help-btn').addEventListener('click', () => {
+            if (gameState.started && !gameState.paused && gameState.stage < 5) {
+                gameState.paused = true;
+                keys.w = keys.a = keys.s = keys.d = false;
+                resetWheel();
+                edgeTurnSpeed = 0;
+                pauseStoryTimers();
+            }
             document.getElementById('welcome-modal').classList.remove('hidden');
             updateCursorVisibility();
             if (document.pointerLockElement && document.exitPointerLock) {
@@ -2316,6 +2469,11 @@
 
         function animateLoop() {
             requestAnimationFrame(animateLoop);
+            if (gameState.paused) {
+                clock.getDelta();
+                renderer.render(scene, camera);
+                return;
+            }
             const dt = Math.min(clock.getDelta(), 0.05);
             const elapsed = clock.elapsedTime;
 
