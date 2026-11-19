@@ -1,3 +1,5 @@
+
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
@@ -472,38 +474,9 @@
                 this.muted = false;
                 this.bgmTimer = null;
                 this.stepCooldown = 0;
-                this.ttsUnlocked = false;
-                this.currentUtterance = null;
-                this.cachedVoices = [];
                 this.pentatonic = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00];
                 this.melodySeq = [0, 2, 3, 5, 4, 3, 2, 1, 2, 4, 5, 7, 6, 5, 3, 2];
                 this.melodyIdx = 0;
-            }
-
-            loadVoices() {
-                if (!('speechSynthesis' in window)) return [];
-                const voices = window.speechSynthesis.getVoices() || [];
-                if (voices.length > 0) {
-                    this.cachedVoices = voices;
-                }
-                return this.cachedVoices;
-            }
-
-            // 在用户首次点击交互时预热唤醒平板/iOS Safari 的语音引擎权限
-            unlockTTS() {
-                if (!('speechSynthesis' in window)) return;
-                this.loadVoices();
-                if (this.ttsUnlocked) return;
-                try {
-                    const warmUp = new SpeechSynthesisUtterance(' ');
-                    warmUp.lang = 'zh-CN';
-                    warmUp.volume = 0;
-                    warmUp.rate = 1.5;
-                    warmUp.onend = () => { this.ttsUnlocked = true; };
-                    warmUp.onerror = () => {};
-                    window.speechSynthesis.speak(warmUp);
-                    this.ttsUnlocked = true;
-                } catch (e) {}
             }
 
             init() {
@@ -517,7 +490,6 @@
                     this.ctx.resume();
                 }
                 this.startBGM();
-                this.unlockTTS();
             }
 
             toggleMute() {
@@ -641,71 +613,37 @@
                 this.playPluck(659.25, 1.4, 0.07, 0.15);
 
                 if ('speechSynthesis' in window) {
-                    const synth = window.speechSynthesis;
-                    let finished = false;
-                    const finishOnce = () => {
-                        if (!finished) {
-                            finished = true;
-                            if (onDone) onDone();
-                        }
-                    };
+                    try {
+                        window.speechSynthesis.cancel();
+                        const utter = new SpeechSynthesisUtterance(text);
+                        utter.lang = 'zh-CN';
+                        utter.rate = 0.82;
+                        utter.pitch = 1.08;
 
-                    const doSpeak = () => {
-                        try {
-                            if (synth.paused) {
-                                synth.resume();
+                        const voices = window.speechSynthesis.getVoices();
+                        const zhVoice = voices.find(v =>
+                            (v.lang.includes('zh') || v.lang.includes('cmn')) &&
+                            (v.name.includes('Natural') || v.name.includes('Xiaoxiao') || v.name.includes('Ting-Ting') || v.name.includes('Google'))
+                        ) || voices.find(v => v.lang.includes('zh') || v.lang.includes('cmn'));
+
+                        if (zhVoice) utter.voice = zhVoice;
+
+                        let finished = false;
+                        const finishOnce = () => {
+                            if (!finished) {
+                                finished = true;
+                                if (onDone) onDone();
                             }
+                        };
 
-                            const voices = this.loadVoices();
-                            const isChineseVoice = (v) => {
-                                const lang = (v.lang || '').toLowerCase().replace('_', '-');
-                                const name = (v.name || '').toLowerCase();
-                                return lang.startsWith('zh') || lang.includes('cmn') ||
-                                    name.includes('chinese') || name.includes('中文') ||
-                                    name.includes('普通话') || name.includes('国语');
-                            };
-
-                            const zhVoice = voices.find(v =>
-                                isChineseVoice(v) &&
-                                (v.name.includes('Natural') || v.name.includes('Xiaoxiao') || v.name.includes('Ting-Ting') || v.name.includes('Google'))
-                            ) || voices.find(isChineseVoice);
-
-                            // 若平板设备已返回语音列表但未安装任何中文语音包，给出友好提示
-                            if (voices.length > 0 && !zhVoice) {
-                                const sub = document.getElementById('recite-subtitle');
-                                if (sub) {
-                                    sub.textContent = '提示：若平板未出声，请检查媒体音量或确认平板已安装中文语音包。';
-                                }
-                            }
-
-                            const cleanText = text.replace(/[，。]/g, '');
-                            const utter = new SpeechSynthesisUtterance(cleanText);
-                            utter.lang = zhVoice ? zhVoice.lang : 'zh-CN';
-                            if (zhVoice) utter.voice = zhVoice;
-                            utter.volume = 1.0;
-                            utter.rate = 0.82;
-                            utter.pitch = 1.06;
-
-                            // 全局持有当前语音对象引用，防止平板浏览器提前垃圾回收导致吞音
-                            this.currentUtterance = utter;
-
-                            utter.onend = finishOnce;
-                            utter.onerror = finishOnce;
-                            synth.speak(utter);
-                            setTimeout(finishOnce, 2800);
-                        } catch (e) {
-                            setTimeout(finishOnce, 1500);
-                        }
-                    };
-
-                    // 仅在正在播放或排队时才取消并短暂延迟，避免平板端 cancel() 吞掉刚触发的语音
-                    if (synth.speaking || synth.pending) {
-                        synth.cancel();
-                        setTimeout(doSpeak, 80);
-                    } else {
-                        doSpeak();
+                        utter.onend = finishOnce;
+                        utter.onerror = finishOnce;
+                        window.speechSynthesis.speak(utter);
+                        setTimeout(finishOnce, 2600);
+                        return;
+                    } catch (e) {
+                        if (onDone) setTimeout(onDone, 1500);
                     }
-                    return;
                 } else {
                     if (onDone) setTimeout(onDone, 1500);
                 }
@@ -714,8 +652,7 @@
 
         const sound = new SoundManager();
         if ('speechSynthesis' in window) {
-            sound.loadVoices();
-            window.speechSynthesis.onvoiceschanged = () => sound.loadVoices();
+            window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
         }
 
         /********************************************************************
@@ -2088,7 +2025,6 @@
         document.getElementById('btn-nian').addEventListener('click', () => {
             if (gameState.isReadingVerse || gameState.reciteIndex >= 4) return;
             gameState.isReadingVerse = true;
-            sound.init();
 
             const currentIdx = gameState.reciteIndex;
             const verseNum = currentIdx + 1;
