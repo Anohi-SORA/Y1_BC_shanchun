@@ -78,9 +78,10 @@
 
         #poem-stage.ending-centered {
             right: 50%;
-            top: 43%;
-            transform: translate(50%, -50%) scale(1.18);
-            gap: 28px;
+            top: 41%;
+            transform: translate(50%, -50%) scale(1.12);
+            gap: 24px;
+            pointer-events: auto;
         }
 
         .poem-column {
@@ -113,14 +114,29 @@
             border-color: rgba(255, 255, 255, 0.25);
             box-shadow: 0 0 25px rgba(255, 255, 255, 0.12);
             text-shadow: 0 0 14px rgba(255, 255, 255, 0.55);
+            cursor: pointer;
+        }
+
+        #poem-stage.ending-centered .poem-column:hover {
+            border-color: rgba(253, 224, 71, 0.7);
+            background: rgba(253, 224, 71, 0.12);
+            transform: translateY(-4px) scale(1.03);
+        }
+
+        #poem-stage.ending-centered .poem-column.selected-verse {
+            color: #fef08a;
+            border-color: rgba(253, 224, 71, 0.85);
+            background: rgba(253, 224, 71, 0.14);
+            box-shadow: 0 0 24px rgba(253, 224, 71, 0.4);
+            transform: translateY(-5px) scale(1.04);
         }
 
         #poem-stage.ending-centered .poem-column.reading-active {
             color: #fde047;
             border-color: #fde047;
-            background: rgba(253, 224, 71, 0.18);
-            box-shadow: 0 0 32px rgba(253, 224, 71, 0.65);
-            transform: translateY(-8px) scale(1.07);
+            background: rgba(253, 224, 71, 0.24);
+            box-shadow: 0 0 36px rgba(253, 224, 71, 0.75);
+            transform: translateY(-9px) scale(1.08);
         }
 
         /* 黑色渐变幕布 */
@@ -263,8 +279,12 @@
         </div>
     </div>
 
-    <!-- 右上角：古风BGM开关、暂停与操作提示按钮 -->
+    <!-- 右上角：直达朗读、暂停、操作指南与古风BGM开关按钮 -->
     <div id="top-right-controls" class="fixed top-4 right-4 z-20 flex items-center gap-2">
+        <button id="skip-to-recite-btn" class="game-action-btn bg-amber-400/95 hover:bg-amber-300 text-amber-950 font-black text-xs sm:text-sm px-3 py-2 rounded-full border-2 border-white shadow-md flex items-center gap-1 cursor-pointer" title="直接跳过游戏进入朗读环节">
+            <span>⏭️</span>
+            <span>跳至朗读</span>
+        </button>
         <button id="pause-btn" class="game-action-btn bg-white/90 hover:bg-amber-50 text-amber-900 font-bold text-xs sm:text-sm px-3 py-2 rounded-full border-2 border-amber-300 shadow-md flex items-center gap-1 cursor-pointer" title="暂停游戏 (Esc)">
             <span>⏸️</span>
             <span class="hidden sm:inline">暂停</span>
@@ -347,7 +367,7 @@
 
             <button id="btn-jump" class="game-action-btn w-16 h-16 rounded-full bg-gradient-to-br from-emerald-400 to-green-600 text-white font-bold shadow-lg border-3 border-white flex flex-col items-center justify-center">
                 <span class="text-lg leading-none">🦘</span>
-                <span class="text-[11px] mt-0.5">跳跃</span>
+                <span id="crouch-jump-label" class="text-[11px] mt-0.5">跳跃</span>
             </button>
         </div>
     </div>
@@ -359,24 +379,42 @@
                 一年级华文 · 图文王国（第24页）
             </div>
             <h2 class="text-2xl sm:text-4xl font-black text-white tracking-widest">《山村》 <span class="text-base sm:text-xl font-normal text-amber-200">[宋] 邵雍</span></h2>
-            <p id="recite-subtitle" class="text-slate-300 text-xs sm:text-sm mt-1">请点击下方的“念”按钮，一句一句朗读古诗吧！</p>
+            <p id="recite-subtitle" class="text-slate-300 text-xs sm:text-sm mt-1">可点击任意诗句或下方按钮选择句子，点击“念”反复朗读！</p>
         </div>
 
         <div class="flex-1"></div>
 
-        <div id="recite-controls" class="flex flex-col items-center gap-3 opacity-0 transition-opacity duration-1000 mb-4 z-40">
-            <div id="recite-progress" class="text-amber-300 text-sm font-bold tracking-wider">
-                准备朗读第 1 / 4 句
+        <div id="recite-controls" class="flex flex-col items-center gap-3 opacity-0 transition-opacity duration-1000 mb-3 z-40">
+            <!-- 任意挑选一句按钮组 -->
+            <div id="verse-picker-bar" class="flex flex-wrap items-center justify-center gap-2">
+                <button data-pick="0" class="verse-pick-btn game-action-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-black border-2 border-amber-300 bg-amber-400 text-amber-950 shadow-md cursor-pointer">
+                    第1句
+                </button>
+                <button data-pick="1" class="verse-pick-btn game-action-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-black border-2 border-white/30 bg-white/10 text-white hover:bg-white/20 shadow-md cursor-pointer">
+                    第2句
+                </button>
+                <button data-pick="2" class="verse-pick-btn game-action-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-black border-2 border-white/30 bg-white/10 text-white hover:bg-white/20 shadow-md cursor-pointer">
+                    第3句
+                </button>
+                <button data-pick="3" class="verse-pick-btn game-action-btn px-3.5 py-1.5 rounded-full text-xs sm:text-sm font-black border-2 border-white/30 bg-white/10 text-white hover:bg-white/20 shadow-md cursor-pointer">
+                    第4句
+                </button>
             </div>
 
-            <button id="btn-nian" class="game-action-btn w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 text-white font-black text-3xl sm:text-4xl shadow-[0_0_40px_rgba(251,191,36,0.65)] border-4 border-amber-100 flex flex-col items-center justify-center cursor-pointer">
-                <span>念</span>
-                <span class="text-xs font-bold text-amber-100 mt-1">点击朗读</span>
-            </button>
+            <div id="recite-progress" class="text-amber-300 text-sm font-bold tracking-wider text-center">
+                已选第 1 句：“一去二三里，” — 点击“念”可反复朗读
+            </div>
 
-            <button id="btn-finish" class="hidden game-action-btn px-10 py-4 rounded-full bg-gradient-to-r from-emerald-400 to-teal-600 text-white font-black text-xl sm:text-2xl shadow-[0_0_35px_rgba(52,211,153,0.6)] border-4 border-white cursor-pointer">
-                🎉 结束
-            </button>
+            <div class="flex items-center justify-center gap-5">
+                <button id="btn-nian" class="game-action-btn w-24 h-24 sm:w-28 sm:h-28 rounded-full bg-gradient-to-br from-amber-400 via-orange-500 to-red-500 text-white font-black text-3xl sm:text-4xl shadow-[0_0_40px_rgba(251,191,36,0.65)] border-4 border-amber-100 flex flex-col items-center justify-center cursor-pointer">
+                    <span>念</span>
+                    <span class="text-xs font-bold text-amber-100 mt-1">点击朗读</span>
+                </button>
+
+                <button id="btn-finish" class="game-action-btn px-8 py-4 rounded-full bg-gradient-to-r from-emerald-400 to-teal-600 text-white font-black text-lg sm:text-xl shadow-[0_0_35px_rgba(52,211,153,0.6)] border-4 border-white cursor-pointer">
+                    🎉 结束
+                </button>
+            </div>
         </div>
     </div>
 
@@ -399,7 +437,7 @@
                         <li>• <b>移动鼠标</b>：直接自由环顾四周（点击画面可锁定准星）</li>
                         <li>• <b>Space (空格)</b>：跳跃</li>
                         <li>• <b>Control (Ctrl)</b>：蹲下</li>
-                        <li>• <b>F 键</b>：开门 / 查看凉亭与红花</li>
+                        <li>• <b>F 键</b>：开门走进屋里 / 查看凉亭与红花</li>
                         <li>• <b>Esc 键</b>：暂停游戏并恢复系统鼠标</li>
                     </ul>
                 </div>
@@ -418,6 +456,9 @@
 
             <button id="start-game-btn" class="game-action-btn mt-6 w-full py-4 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-red-500 text-white font-black text-lg sm:text-xl shadow-xl border-2 border-amber-200 cursor-pointer">
                 ✨ 出发寻找小精灵！
+            </button>
+            <button id="welcome-skip-btn" class="game-action-btn mt-2.5 w-full py-2.5 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-black text-sm border-2 border-amber-300 cursor-pointer">
+                ⏭️ 跳过游戏环节，直接进入朗读
             </button>
         </div>
     </div>
@@ -472,6 +513,7 @@
                 this.muted = false;
                 this.bgmTimer = null;
                 this.stepCooldown = 0;
+                this.speechToken = 0;
                 this.pentatonic = [261.63, 293.66, 329.63, 392.00, 440.00, 523.25, 587.33, 659.25, 783.99, 880.00];
                 this.melodySeq = [0, 2, 3, 5, 4, 3, 2, 1, 2, 4, 5, 7, 6, 5, 3, 2];
                 this.melodyIdx = 0;
@@ -607,8 +649,15 @@
             }
 
             speakVerse(text, onDone) {
+                const token = ++this.speechToken;
                 this.playPluck(523.25, 1.4, 0.08, 0);
                 this.playPluck(659.25, 1.4, 0.07, 0.15);
+
+                const finishOnce = () => {
+                    if (token === this.speechToken && onDone) {
+                        onDone();
+                    }
+                };
 
                 if ('speechSynthesis' in window) {
                     try {
@@ -627,23 +676,23 @@
                         if (zhVoice) utter.voice = zhVoice;
 
                         let finished = false;
-                        const finishOnce = () => {
+                        const handleEnd = () => {
                             if (!finished) {
                                 finished = true;
-                                if (onDone) onDone();
+                                finishOnce();
                             }
                         };
 
-                        utter.onend = finishOnce;
-                        utter.onerror = finishOnce;
+                        utter.onend = handleEnd;
+                        utter.onerror = handleEnd;
                         window.speechSynthesis.speak(utter);
-                        setTimeout(finishOnce, 2600);
+                        setTimeout(handleEnd, 2600);
                         return;
                     } catch (e) {
-                        if (onDone) setTimeout(onDone, 1500);
+                        setTimeout(finishOnce, 1500);
                     }
                 } else {
-                    if (onDone) setTimeout(onDone, 1500);
+                    setTimeout(finishOnce, 1500);
                 }
             }
         }
@@ -918,7 +967,7 @@
         }
 
         /********************************************************************
-         * 4. 构建“烟村四五家”：五户散落的人家
+         * 4. 构建“烟村四五家”：五户散落的人家（带可通行门口开口与室内家具）
          ********************************************************************/
         const houses = [];
         const chimneySmokeParticles = [];
@@ -934,6 +983,7 @@
         houseSpecs.forEach((spec, idx) => {
             const group = new THREE.Group();
             const wallMat = new THREE.MeshLambertMaterial({ color: spec.wallColor });
+
             const backWall = new THREE.Mesh(new THREE.BoxGeometry(5.2, 3.6, 0.35), wallMat);
             backWall.position.set(0, 1.8, -2.2);
             backWall.castShadow = true;
@@ -949,15 +999,15 @@
             rightWall.castShadow = true;
             group.add(rightWall);
 
-            const frontLeft = new THREE.Mesh(new THREE.BoxGeometry(1.75, 3.6, 0.35), wallMat);
-            frontLeft.position.set(-1.72, 1.8, 2.2);
+            const frontLeft = new THREE.Mesh(new THREE.BoxGeometry(1.55, 3.6, 0.35), wallMat);
+            frontLeft.position.set(-1.825, 1.8, 2.2);
             group.add(frontLeft);
 
-            const frontRight = new THREE.Mesh(new THREE.BoxGeometry(1.75, 3.6, 0.35), wallMat);
-            frontRight.position.set(1.72, 1.8, 2.2);
+            const frontRight = new THREE.Mesh(new THREE.BoxGeometry(1.55, 3.6, 0.35), wallMat);
+            frontRight.position.set(1.825, 1.8, 2.2);
             group.add(frontRight);
 
-            const frontTop = new THREE.Mesh(new THREE.BoxGeometry(1.8, 1.1, 0.35), wallMat);
+            const frontTop = new THREE.Mesh(new THREE.BoxGeometry(2.15, 1.1, 0.35), wallMat);
             frontTop.position.set(0, 3.05, 2.2);
             group.add(frontTop);
 
@@ -1027,20 +1077,20 @@
             group.add(chimney);
 
             const doorPivot = new THREE.Group();
-            doorPivot.position.set(-0.82, 1.25, 2.22);
+            doorPivot.position.set(-1.02, 1.25, 2.22);
 
             const doorMesh = new THREE.Mesh(
-                new THREE.BoxGeometry(1.64, 2.45, 0.14),
+                new THREE.BoxGeometry(2.04, 2.45, 0.14),
                 new THREE.MeshLambertMaterial({ color: 0xb07d62 })
             );
-            doorMesh.position.set(0.82, 0, 0);
+            doorMesh.position.set(1.02, 0, 0);
             doorPivot.add(doorMesh);
 
             const knob = new THREE.Mesh(
                 new THREE.SphereGeometry(0.11, 10, 10),
                 new THREE.MeshBasicMaterial({ color: 0xffd166 })
             );
-            knob.position.set(1.38, 0, 0.1);
+            knob.position.set(1.76, 0, 0.1);
             doorPivot.add(knob);
 
             group.add(doorPivot);
@@ -1048,7 +1098,7 @@
             group.rotation.y = spec.rotY;
             scene.add(group);
 
-            const doorLocal = new THREE.Vector3(0, 1.2, 3.2);
+            const doorLocal = new THREE.Vector3(0, 1.2, 2.9);
             doorLocal.applyAxisAngle(new THREE.Vector3(0, 1, 0), spec.rotY);
             const doorWorld = new THREE.Vector3(spec.x + doorLocal.x, 1.2, spec.z + doorLocal.z);
 
@@ -1071,6 +1121,9 @@
 
             houses.push({
                 id: idx,
+                x: spec.x,
+                z: spec.z,
+                rotY: spec.rotY,
                 name: spec.name,
                 group,
                 doorPivot,
@@ -1587,7 +1640,6 @@
             }
         });
 
-        // 在游戏画布监听点击事件，请求锁定指针
         canvas.addEventListener('click', () => {
             if (!gameState.paused) {
                 requestPointerLockIfNeeded();
@@ -1607,7 +1659,6 @@
             isMouseDragging = false;
         });
 
-        // 监听鼠标移动：同时支持 Pointer Lock 与预览沙盒下的直接移动转动视角
         window.addEventListener('mousemove', (e) => {
             if (!gameState.started || gameState.paused || gameState.stage === 5) return;
             const welcomeHidden = document.getElementById('welcome-modal').classList.contains('hidden');
@@ -1633,7 +1684,6 @@
                 lastMouseX = e.clientX;
                 lastMouseY = e.clientY;
 
-                // 当鼠标移近左右边缘时，自动平滑续转视角，防止滑出边界后转不动
                 const margin = Math.max(48, window.innerWidth * 0.08);
                 if (e.clientX <= margin) {
                     edgeTurnSpeed = ((margin - e.clientX) / margin) * 1.9;
@@ -1705,6 +1755,16 @@
         /********************************************************************
          * 10. 互动系统（五户人家、七座凉亭、十朵红花）
          ********************************************************************/
+        function isPlayerInsideHouse(h) {
+            const dx = player.x - h.x;
+            const dz = player.z - h.z;
+            const cosNeg = Math.cos(-h.rotY);
+            const sinNeg = Math.sin(-h.rotY);
+            const localX = dx * cosNeg - dz * sinNeg;
+            const localZ = dx * sinNeg + dz * cosNeg;
+            return Math.abs(localX) < 2.25 && Math.abs(localZ) < 2.05;
+        }
+
         function updateNearbyInteractable() {
             const hintBox = document.getElementById('interact-hint');
             const hintText = document.getElementById('interact-hint-text');
@@ -1716,8 +1776,12 @@
 
             if (gameState.stage === 2) {
                 houses.forEach(h => {
-                    const dist = Math.hypot(player.x - h.doorPos.x, player.z - h.doorPos.z);
-                    if (dist < minDist) {
+                    const doorCenterLocal = new THREE.Vector3(0, 1.2, 2.2);
+                    doorCenterLocal.applyAxisAngle(new THREE.Vector3(0, 1, 0), h.rotY);
+                    const doorCenterX = h.x + doorCenterLocal.x;
+                    const doorCenterZ = h.z + doorCenterLocal.z;
+                    const dist = Math.hypot(player.x - doorCenterX, player.z - doorCenterZ);
+                    if (dist < 3.6 && dist < minDist) {
                         minDist = dist;
                         closest = { type: 'house', obj: h };
                     }
@@ -1751,9 +1815,13 @@
 
                 if (closest.type === 'house') {
                     interactEmoji.textContent = '🚪';
-                    hintText.textContent = closest.obj.visited
-                        ? `再次打开 ${closest.obj.name} 的门`
-                        : `敲开 ${closest.obj.name} 的门`;
+                    if (closest.obj.doorState === 'open' || closest.obj.doorState === 'opening') {
+                        hintText.textContent = `木门已打开，可直接从门口走入 ${closest.obj.name}`;
+                    } else {
+                        hintText.textContent = closest.obj.visited
+                            ? `再次打开 ${closest.obj.name} 的门`
+                            : `推开 ${closest.obj.name} 的门`;
+                    }
                 } else if (closest.type === 'pavilion') {
                     interactEmoji.textContent = '🏯';
                     hintText.textContent = `查看 ${closest.obj.name}`;
@@ -1784,12 +1852,14 @@
         function handleHouseInteract(house) {
             if (house.doorState === 'closed' || house.doorState === 'closing') {
                 house.doorState = 'opening';
-                house.openTimer = 3.2;
+                house.openTimer = 4.5;
                 sound.playDoor(true);
+            } else {
+                house.openTimer = 4.5;
             }
 
             if (house.visited) {
-                showDialog('温馨小屋', `你推开了${house.name}的木门，屋内挂着暖暖的灯笼，桌上放着红茶壶与山水画！`, '🏠', 3800);
+                showDialog('温馨小屋', `你推开了${house.name}的木门，可以从门口走进去参观屋内的灯笼、红茶壶与山水画哦！`, '🏠', 3800);
                 return;
             }
 
@@ -1799,7 +1869,7 @@
             if (gameState.housesVisitedCount < 5) {
                 showDialog(
                     '山村探秘',
-                    `打开了${house.name}！屋里有精致的木桌、茶壶和灯笼，不过小精灵不在这里（已探访 ${gameState.housesVisitedCount}/5 户）。`,
+                    `推开了${house.name}的木门！你可以从门口走进去看看屋里的摆设，小精灵不在这里（已探访 ${gameState.housesVisitedCount}/5 户）。`,
                     '🏠',
                     4500
                 );
@@ -1850,6 +1920,7 @@
                 );
                 updateQuestText(`寻找七座凉亭 (${gameState.pavilionsVisitedCount}/7 座)`);
             } else {
+                updateQuestText('寻找七座凉亭 (7/7 座)');
                 const benchWorldPos = new THREE.Vector3(pavilion.pos.x, 1.3, pavilion.pos.z);
                 fairy.group.position.copy(benchWorldPos);
                 fairy.group.visible = true;
@@ -1858,7 +1929,7 @@
 
                 showDialog(
                     '山村小精灵 · 灵儿',
-                    '哈哈，我从凉亭的长凳变出来啦！看我飞到凉亭后方，变成十朵红花考考你！',
+                    '哈哈，我从第 7 座凉亭的长凳变出来啦！看我飞到凉亭后方，变成十朵红花考考你！',
                     '🧚‍♀️',
                     5500
                 );
@@ -1923,7 +1994,7 @@
         }
 
         /********************************************************************
-         * 11. 剧情触发推进与结尾闪黑跟读系统
+         * 11. 剧情触发推进与结尾闪黑自由选句朗读系统
          ********************************************************************/
         function startGameIntro() {
             gameState.started = true;
@@ -1966,7 +2037,7 @@
                 updateQuestText('探访炊烟人家 (0/5 户)');
                 showDialog(
                     '山村小精灵 · 灵儿',
-                    '欢迎来到炊烟袅袅的小山村！第二句“烟村四五家。”出现啦！快去敲开五户人家的门找我吧！',
+                    '欢迎来到炊烟袅袅的小山村！第二句“烟村四五家。”出现啦！快去推开五户人家的木门走进去找我吧！',
                     '🧚‍♀️',
                     5500
                 );
@@ -1992,8 +2063,61 @@
             '八九十枝花。'
         ];
 
+        function selectReciteVerse(index) {
+            if (index < 0 || index > 3) return;
+            gameState.reciteIndex = index;
+
+            for (let i = 1; i <= 4; i++) {
+                const col = document.getElementById(`verse-${i}`);
+                col.classList.toggle('selected-verse', i - 1 === index);
+                if (!gameState.isReadingVerse) {
+                    col.classList.remove('reading-active');
+                }
+            }
+
+            document.querySelectorAll('.verse-pick-btn').forEach(btn => {
+                const pickIdx = Number(btn.getAttribute('data-pick'));
+                const isSelected = pickIdx === index;
+                btn.classList.toggle('border-amber-300', isSelected);
+                btn.classList.toggle('bg-amber-400', isSelected);
+                btn.classList.toggle('text-amber-950', isSelected);
+                btn.classList.toggle('border-white/30', !isSelected);
+                btn.classList.toggle('bg-white/10', !isSelected);
+                btn.classList.toggle('text-white', !isSelected);
+            });
+
+            document.getElementById('recite-progress').textContent =
+                `已选第 ${index + 1} 句：“${versesText[index]}” — 点击“念”可反复朗读`;
+        }
+
         function startEndingRecitationPhase() {
+            clearStoryTimers();
+            if (dialogTimeout) {
+                clearTimeout(dialogTimeout);
+                dialogTimeout = null;
+            }
+            const dialogBox = document.getElementById('dialog-box');
+            dialogBox.classList.add('opacity-0', '-translate-y-3');
+            dialogBox.classList.remove('opacity-100', 'translate-y-0');
+
+            // 确保跳过游戏时四句古诗全部显示
+            for (let i = 1; i <= 4; i++) {
+                gameState.verseShown[i - 1] = true;
+                document.getElementById(`verse-${i}`).classList.add('visible');
+            }
+
+            gameState.started = true;
+            gameState.paused = false;
             gameState.stage = 5;
+            keys.w = keys.a = keys.s = keys.d = false;
+            resetWheel();
+            edgeTurnSpeed = 0;
+
+            document.getElementById('welcome-modal').classList.add('hidden');
+            const pauseModal = document.getElementById('pause-modal');
+            pauseModal.classList.add('hidden');
+            pauseModal.classList.remove('flex');
+
             updateCursorVisibility();
             if (document.pointerLockElement && document.exitPointerLock) {
                 document.exitPointerLock();
@@ -2004,24 +2128,42 @@
             document.getElementById('wheel-container').style.opacity = '0';
             document.getElementById('action-buttons').style.opacity = '0';
             document.getElementById('pc-controls-bar').style.opacity = '0';
+            document.getElementById('top-right-controls').style.opacity = '0';
+            document.getElementById('top-right-controls').style.pointerEvents = 'none';
             document.getElementById('custom-cursor').style.opacity = '0';
 
             const overlay = document.getElementById('blackout-overlay');
             overlay.classList.add('active');
 
+            selectReciteVerse(0);
+
             scheduleStoryTimeout(() => {
                 document.getElementById('poem-stage').classList.add('ending-centered');
-            }, 900);
+            }, 600);
 
             scheduleStoryTimeout(() => {
                 document.getElementById('recite-header').classList.remove('opacity-0');
                 document.getElementById('recite-controls').classList.remove('opacity-0');
-                gameState.reciteIndex = 0;
-            }, 2200);
+            }, 1400);
+        }
+
+        document.querySelectorAll('.verse-pick-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const idx = Number(btn.getAttribute('data-pick'));
+                selectReciteVerse(idx);
+            });
+        });
+
+        for (let i = 1; i <= 4; i++) {
+            document.getElementById(`verse-${i}`).addEventListener('click', () => {
+                if (gameState.stage === 5) {
+                    selectReciteVerse(i - 1);
+                }
+            });
         }
 
         document.getElementById('btn-nian').addEventListener('click', () => {
-            if (gameState.isReadingVerse || gameState.reciteIndex >= 4) return;
+            sound.init();
             gameState.isReadingVerse = true;
 
             const currentIdx = gameState.reciteIndex;
@@ -2035,26 +2177,22 @@
             activeCol.classList.add('reading-active');
 
             const btnNian = document.getElementById('btn-nian');
-            btnNian.classList.add('scale-95', 'opacity-80');
-            document.getElementById('recite-progress').textContent = `正在朗读第 ${verseNum} / 4 句：“${verseText}”`;
+            btnNian.classList.add('scale-95');
+            document.getElementById('recite-progress').textContent = `正在朗读第 ${verseNum} 句：“${verseText}”`;
 
             sound.speakVerse(verseText, () => {
                 gameState.isReadingVerse = false;
-                btnNian.classList.remove('scale-95', 'opacity-80');
-                gameState.reciteIndex++;
-
-                if (gameState.reciteIndex < 4) {
-                    document.getElementById('recite-progress').textContent = `请继续点击“念”朗读第 ${gameState.reciteIndex + 1} / 4 句`;
-                } else {
-                    document.getElementById('recite-progress').textContent = '四句古诗全部朗读完成！';
-                    document.getElementById('recite-subtitle').textContent = '你念得真好听！请点击下方的“结束”按钮吧！';
-                    btnNian.classList.add('hidden');
-                    document.getElementById('btn-finish').classList.remove('hidden');
-                }
+                btnNian.classList.remove('scale-95');
+                activeCol.classList.remove('reading-active');
+                document.getElementById('recite-progress').textContent =
+                    `已选第 ${verseNum} 句：“${verseText}” — 可再次点击“念”重复朗读，或挑选其他句子`;
             });
         });
 
         document.getElementById('btn-finish').addEventListener('click', () => {
+            if (window.speechSynthesis) {
+                window.speechSynthesis.cancel();
+            }
             const modal = document.getElementById('completion-modal');
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -2129,18 +2267,17 @@
             poemStage.classList.remove('ending-centered');
             for (let i = 1; i <= 4; i++) {
                 const col = document.getElementById(`verse-${i}`);
-                col.classList.remove('visible', 'reading-active');
+                col.classList.remove('visible', 'reading-active', 'selected-verse');
             }
 
             document.getElementById('blackout-overlay').classList.remove('active');
             document.getElementById('recite-header').classList.add('opacity-0');
             document.getElementById('recite-controls').classList.add('opacity-0');
-            document.getElementById('recite-subtitle').textContent = '请点击下方的“念”按钮，一句一句朗读古诗吧！';
-            document.getElementById('recite-progress').textContent = '准备朗读第 1 / 4 句';
+            document.getElementById('recite-subtitle').textContent = '可点击任意诗句或下方按钮选择句子，点击“念”反复朗读！';
+            document.getElementById('recite-progress').textContent = '已选第 1 句：“一去二三里，” — 点击“念”可反复朗读';
 
             const btnNian = document.getElementById('btn-nian');
             btnNian.classList.remove('hidden', 'scale-95', 'opacity-80');
-            document.getElementById('btn-finish').classList.add('hidden');
 
             const completionModal = document.getElementById('completion-modal');
             completionModal.classList.add('hidden');
@@ -2154,6 +2291,8 @@
             document.getElementById('wheel-container').style.opacity = '1';
             document.getElementById('action-buttons').style.opacity = '1';
             document.getElementById('pc-controls-bar').style.opacity = '1';
+            document.getElementById('top-right-controls').style.opacity = '1';
+            document.getElementById('top-right-controls').style.pointerEvents = 'auto';
             document.getElementById('custom-cursor').style.opacity = '1';
             document.getElementById('interact-hint').classList.add('hidden');
 
@@ -2164,6 +2303,16 @@
         document.getElementById('pause-btn').addEventListener('click', togglePause);
         document.getElementById('resume-btn').addEventListener('click', resumeGame);
         document.getElementById('pause-restart-btn').addEventListener('click', resetGame);
+
+        document.getElementById('skip-to-recite-btn').addEventListener('click', () => {
+            sound.init();
+            startEndingRecitationPhase();
+        });
+
+        document.getElementById('welcome-skip-btn').addEventListener('click', () => {
+            sound.init();
+            startEndingRecitationPhase();
+        });
 
         document.getElementById('start-game-btn').addEventListener('click', () => {
             document.getElementById('welcome-modal').classList.add('hidden');
@@ -2307,9 +2456,89 @@
         }
 
         /********************************************************************
-         * 13. 主动画与物理循环
+         * 13. 房屋分段碰撞辅助与主动画物理循环
          ********************************************************************/
         const clock = new THREE.Clock();
+
+        function resolveCircleAABB(lx, lz, radius, minX, maxX, minZ, maxZ) {
+            const closestX = Math.max(minX, Math.min(maxX, lx));
+            const closestZ = Math.max(minZ, Math.min(maxZ, lz));
+            const dx = lx - closestX;
+            const dz = lz - closestZ;
+            const distSq = dx * dx + dz * dz;
+
+            if (distSq >= radius * radius) {
+                return { lx, lz };
+            }
+
+            if (distSq > 1e-6) {
+                const dist = Math.sqrt(distSq);
+                const push = radius - dist;
+                return {
+                    lx: lx + (dx / dist) * push,
+                    lz: lz + (dz / dist) * push
+                };
+            }
+
+            const penLeft = Math.abs(lx - minX);
+            const penRight = Math.abs(maxX - lx);
+            const penTop = Math.abs(lz - minZ);
+            const penBottom = Math.abs(maxZ - lz);
+            const minPen = Math.min(penLeft, penRight, penTop, penBottom);
+
+            if (minPen === penLeft) return { lx: minX - radius, lz };
+            if (minPen === penRight) return { lx: maxX + radius, lz };
+            if (minPen === penTop) return { lx, lz: minZ - radius };
+            return { lx, lz: maxZ + radius };
+        }
+
+        // 村庄房屋碰撞检测：四周墙壁阻挡穿墙，打开门后可从门口开口自由走进屋内
+        function resolveHouseCollisions() {
+            const playerRadius = 0.34;
+
+            houses.forEach(h => {
+                const dx = player.x - h.x;
+                const dz = player.z - h.z;
+                const cosNeg = Math.cos(-h.rotY);
+                const sinNeg = Math.sin(-h.rotY);
+
+                let localX = dx * cosNeg - dz * sinNeg;
+                let localZ = dx * sinNeg + dz * cosNeg;
+
+                if (Math.abs(localX) > 3.6 || Math.abs(localZ) > 3.6) return;
+
+                // 1. 后墙
+                ({ lx: localX, lz: localZ } = resolveCircleAABB(localX, localZ, playerRadius, -2.62, 2.62, -2.38, -2.02));
+                // 2. 左墙
+                ({ lx: localX, lz: localZ } = resolveCircleAABB(localX, localZ, playerRadius, -2.62, -2.27, -2.38, 2.38));
+                // 3. 右墙
+                ({ lx: localX, lz: localZ } = resolveCircleAABB(localX, localZ, playerRadius, 2.27, 2.62, -2.38, 2.38));
+                // 4. 前墙左侧（门框左侧）
+                ({ lx: localX, lz: localZ } = resolveCircleAABB(localX, localZ, playerRadius, -2.62, -1.05, 2.04, 2.36));
+                // 5. 前墙右侧（门框右侧）
+                ({ lx: localX, lz: localZ } = resolveCircleAABB(localX, localZ, playerRadius, 1.05, 2.62, 2.04, 2.36));
+
+                // 6. 木门关闭时挡住门口，开门后让出通道允许从开口进入屋内
+                if (h.doorAngle <= 0.25) {
+                    ({ lx: localX, lz: localZ } = resolveCircleAABB(localX, localZ, playerRadius, -1.06, 1.06, 2.04, 2.36));
+                }
+
+                // 7. 屋内圆桌碰撞，防止穿过茶壶圆桌
+                const tdx = localX;
+                const tdz = localZ - (-0.4);
+                const tDist = Math.hypot(tdx, tdz);
+                const minTableDist = 0.85 + playerRadius;
+                if (tDist < minTableDist && tDist > 1e-6) {
+                    localX = (tdx / tDist) * minTableDist;
+                    localZ = -0.4 + (tdz / tDist) * minTableDist;
+                }
+
+                const cosPos = Math.cos(h.rotY);
+                const sinPos = Math.sin(h.rotY);
+                player.x = h.x + (localX * cosPos - localZ * sinPos);
+                player.z = h.z + (localX * sinPos + localZ * cosPos);
+            });
+        }
 
         function updatePlayer(dt) {
             if (!gameState.started || gameState.stage === 5) return;
@@ -2352,6 +2581,8 @@
                 if (player.isGrounded) sound.playStep();
             }
 
+            resolveHouseCollisions();
+
             if (!player.isGrounded) {
                 player.vy -= 24 * dt;
                 player.y += player.vy * dt;
@@ -2393,17 +2624,20 @@
 
             houses.forEach(h => {
                 if (h.doorState === 'opening') {
-                    h.doorAngle += dt * 2.8;
-                    if (h.doorAngle >= Math.PI * 0.52) {
-                        h.doorAngle = Math.PI * 0.52;
+                    h.doorAngle += dt * 3.0;
+                    if (h.doorAngle >= Math.PI * 0.62) {
+                        h.doorAngle = Math.PI * 0.62;
                         h.doorState = 'open';
                     }
                     h.doorPivot.rotation.y = -h.doorAngle;
                 } else if (h.doorState === 'open') {
-                    h.openTimer -= dt;
-                    if (h.openTimer <= 0) {
-                        h.doorState = 'closing';
-                        sound.playDoor(false);
+                    // 玩家正在屋内参观时保持门敞开，方便随时走出来
+                    if (!isPlayerInsideHouse(h)) {
+                        h.openTimer -= dt;
+                        if (h.openTimer <= 0) {
+                            h.doorState = 'closing';
+                            sound.playDoor(false);
+                        }
                     }
                 } else if (h.doorState === 'closing') {
                     h.doorAngle -= dt * 2.4;
